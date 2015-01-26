@@ -1,0 +1,21 @@
+{
+  "name": "codeworkz/phpsq",
+  "type": "library",
+  "description": "",
+  "keywords": ["phpsq"],
+  "homepage": "https://github.com/anton-github/phpsq",
+  "license": "Apache License 2.0",
+  "authors": [
+    {
+      "name": "Anton",
+      "email": "shockfront00@gmail.com",
+      "homepage": "https://github.com/anton-github/"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0"
+  },
+  "autoload": {
+    "psr-4": {"phpsq\\": ""}
+  }
+}
