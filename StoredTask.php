@@ -6,7 +6,7 @@ class StoredTask
     private $task;
     private $resultKey;
 
-    public function __construct(ITask $task, $resultKey = null)
+    public function __construct(TaskInterface $task, $resultKey = null)
     {
         $this->task = $task;
         $this->resultKey = $resultKey;

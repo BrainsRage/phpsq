@@ -1,7 +1,7 @@
 <?php
 namespace phpsq\storages;
 
-use phpsq\IStorage;
+use phpsq\StorageInterface;
 use phpsq\StoredTask;
 use Redis;
 
@@ -12,7 +12,7 @@ use Redis;
  *
  * @package phpsq\storages
  */
-class RedisStorage implements IStorage
+class RedisStorage implements StorageInterface
 {
     private $redis;
 

@@ -6,7 +6,7 @@ use phpsq\exceptions\PhpSQException;
 /**
  * Class Queue
  *
- * @property IStorage $storage
+ * @property StorageInterface $storage
  *
  * @package phpsq
  */
@@ -46,7 +46,7 @@ class Queue
         return $this->getInStoragePrefix() . $this->getName();
     }
 
-    public function setStorage(IStorage $storage)
+    public function setStorage(StorageInterface $storage)
     {
         $this->storage = $storage;
     }
@@ -56,7 +56,7 @@ class Queue
         return $this->storage;
     }
 
-    public function addAsyncTask(ITask $task)
+    public function addAsyncTask(TaskInterface $task)
     {
         $storedTask = new StoredTask($task);
         $taskAdded = $this->getStorage()->addTask($this->getInStorageKey(), $storedTask);
@@ -66,7 +66,7 @@ class Queue
         return $taskAdded;
     }
 
-    public function addSyncTask(ITask $task)
+    public function addSyncTask(TaskInterface $task)
     {
         $result = null;
         $resultKey = StringHelper::generateRandomKey();

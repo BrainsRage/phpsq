@@ -1,7 +1,7 @@
 <?php
 namespace phpsq;
 
-interface IStorage
+interface StorageInterface
 {
     /**
      * @param            $inStorageQueueKey

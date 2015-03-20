@@ -1,7 +1,7 @@
 <?php
 namespace phpsq;
 
-interface ITask
+interface TaskInterface
 {
     /**
      * @return string

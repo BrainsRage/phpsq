@@ -1,9 +1,9 @@
 <?php
 namespace phpsq\test;
 
-use phpsq\ITask;
+use phpsq\TaskInterface;
 
-class TestTask implements ITask
+class TestTask implements TaskInterface
 {
     public $message = 'no message';
 
