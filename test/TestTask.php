@@ -22,4 +22,14 @@ class TestTask implements TaskInterface
         }
         return true;
     }
+
+    public function getCommand()
+    {
+        return 'php /var/www/phpsq/test/command.php taskKey="' . self::class . '" message=' . $this->message;
+    }
+
+    public function getLogFile()
+    {
+        return '/tmp/out.log';
+    }
 }
