@@ -13,7 +13,10 @@ return [
         'list'    => [
             'test' => [
                 'inStoragePrefix' => 'queue_redis',
-                'storage'         => 'redis'
+                'storage'         => 'redis',
+                'numberProcess'   => 5,
+                'outFile'         => '/var/www/phpsq/test/%(program_name)s_%(process_num)03d_out',
+                'errorFile'       => '/var/www/phpsq/test/%(program_name)s_%(process_num)03d_err'
             ],
         ],
     ],

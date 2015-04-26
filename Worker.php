@@ -19,6 +19,7 @@ class Worker
     public function start()
     {
         while (true) {
+            $this->checkPaused();
             $storedTask = $this->getQueue()->getTask();
             if ($storedTask) {
                 echo 'GET task';
@@ -34,5 +35,10 @@ class Worker
                 sleep(1);
             }
         }
+    }
+
+    public function checkPaused()
+    {
+
     }
 }

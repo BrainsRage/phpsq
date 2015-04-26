@@ -7,12 +7,14 @@ use phpsq\exceptions\PhpSQException;
  * Class PHPSQ
  *
  * @property StorageInterface[] $storages
- * @property Queue[]    $queues
+ * @property Queue[]            $queues
  *
  * @package phpsq
  */
 class PhpSQ
 {
+    const DEFAULT_STORAGE_NAME = 'default';
+
     private $storages = [];
     private $queues = [];
     private $isInitialized = false;
@@ -81,12 +83,12 @@ class PhpSQ
     { /* ... @return Singleton */
     }  // Защищаем от создания через unserialize
 
-    public static function getInstance($configFile = null)
+    public static function getInstance($config = null)
     {    // Возвращает единственный экземпляр класса. @return Singleton
         if (empty(self::$instance)) {
             $instance = new static();
-            if ($configFile) {
-                $instance->init($configFile);
+            if ($config) {
+                $instance->init($config);
             }
             self::$instance = $instance;
         }
@@ -97,16 +99,11 @@ class PhpSQ
 
     // <editor-fold desc="Init stuff">
 
-    public function init($configFile)
+    public function init($config)
     {
         if (!$this->getIsInitialized()) {
-            if (file_exists($configFile)) {
-                $config = require($configFile);
-                $this->setConfig($config);
-                $this->setIsInitialized(true);
-            } else {
-                throw new PhpSQException('Config file not exist');
-            }
+            $this->setConfig($config);
+            $this->setIsInitialized(true);
         } else {
             throw new PhpSQException('PhpSQ has been initialized already');
         }
@@ -124,7 +121,16 @@ class PhpSQ
 
     private function setConfig(array $config)
     {
-        if (isset($config['storages'])) {
+        if(isset($config['supervisorConfigPath'])){
+
+        }
+
+        if (isset($config['storage']) && is_string($config['storage'])) {
+            //single storage
+            $storageClass = $config['storage'];
+            $storage = new $storageClass;
+            $this->addStorage(self::DEFAULT_STORAGE_NAME, $storage);
+        } elseif (isset($config['storages'])) {
             $storages = $config['storages'];
             if ($storages) {
                 foreach ($storages as $name => $storageConfig) {
@@ -136,62 +142,78 @@ class PhpSQ
                         throw new PhpSQException("No class for {$name}-storage config");
                     }
                 }
+            }
+        } else {
+            throw new PhpSQException('No storages param in config');
+        }
 
-                if (isset($config['queues'])) {
-                    $queues = $config['queues'];
-                    $defaultStorage = null;
-                    if ($queues) {
+        if ($this->hasStorages()) {
+            if (isset($config['queues'])) {
+                $queues = $config['queues'];
+                $defaultStorage = null;
+                if ($queues) {
+                    //just queues names array
+                    if (!isset($queues['list'])) {
+                        foreach ($queues as $name) {
+                            $queue = new Queue($name);
+                            $queueStorage = $this->getStorageByName(self::DEFAULT_STORAGE_NAME);
+                            $queue->setStorage($queueStorage);
+                            $this->addQueue($name, $queue);
+                        }
+                    } elseif ($queues['list']) {
+
                         if (isset($queues['storage'])) {
                             $defaultQueuesStorageName = $queues['storage'];
                             $defaultStorage = $this->getStorageByName($defaultQueuesStorageName);
                         }
-                        if (isset($queues['list'])) {
-                            $queues = $queues['list'];
-                            if ($queues) {
-                                foreach ($queues as $name => $queueConfig) {
-                                    $queue = new Queue($name);
-                                    if (isset($queueConfig['inStoragePrefix'])) {
-                                        $inStoragePrefix = $queueConfig['inStoragePrefix'];
-                                        $queue->setInStoragePrefix($inStoragePrefix);
-                                    }
-                                    $queueStorage = null;
-                                    if (isset($queueConfig['storage'])) {
-                                        $storageName = $queueConfig['storage'];
-                                        $queueStorage = $this->getStorageByName($storageName);
-                                    } else {
-                                        $queueStorage = $defaultStorage;
-                                    }
-                                    if ($queueStorage) {
-                                        $queue->setStorage($queueStorage);
-                                        $this->addQueue($name, $queue);
-                                    } else {
-                                        throw new PhpSQException('Queue storage must be set');
-                                    }
+
+                        $queues = $queues['list'];
+                        if ($queues) {
+                            foreach ($queues as $name => $queueConfig) {
+                                $queue = new Queue($name);
+                                if (isset($queueConfig['inStoragePrefix'])) {
+                                    $inStoragePrefix = $queueConfig['inStoragePrefix'];
+                                    $queue->setInStoragePrefix($inStoragePrefix);
                                 }
-                            } else {
-                                throw new PhpSQException('No queues');
+                                $queueStorage = null;
+                                if (isset($queueConfig['storage'])) {
+                                    $storageName = $queueConfig['storage'];
+                                    $queueStorage = $this->getStorageByName($storageName);
+                                } else {
+                                    $queueStorage = $defaultStorage;
+                                }
+                                if ($queueStorage) {
+                                    $queue->setStorage($queueStorage);
+                                    $this->addQueue($name, $queue);
+                                } else {
+                                    throw new PhpSQException('Queue storage must be set');
+                                }
                             }
                         } else {
-                            throw new PhpSQException('No queues list');
+                            throw new PhpSQException('No queues');
                         }
                     } else {
-                        throw new PhpSQException('No queues config');
+                        throw new PhpSQException('No queues list');
                     }
                 } else {
-                    throw new PhpSQException('No queues param in config');
+                    throw new PhpSQException('No queues config');
                 }
-
             } else {
-                throw new PhpSQException('No storages');
+                throw new PhpSQException('No queues param in config');
             }
         } else {
-            throw new PhpSQException('No storages param in config');
+            throw new PhpSQException('No storages');
         }
     }
 
     private function addStorage($name, StorageInterface $storage)
     {
         $this->storages[$name] = $storage;
+    }
+
+    private function hasStorages()
+    {
+        return count($this->storages) > 0;
     }
 
     private function addQueue($name, Queue $queue)

@@ -9,9 +9,12 @@
 use phpsq\PhpSQ;
 use phpsq\test\TestTask;
 
-require __DIR__ . '/../vendor/autoload.php';
+require(__DIR__ . '/../vendor/autoload.php');
 
-$phpsq = PhpSQ::getInstance(__DIR__ . '/config.php');
+$config = require __DIR__ . '/config.php';
+$configSimple = require __DIR__ . '/config_simple.php';
+$phpsq = PhpSQ::getInstance($configSimple);
+
 $task = new TestTask();
 $task->message = 'hello';
 $result = $phpsq->setAsyncTask($task);
