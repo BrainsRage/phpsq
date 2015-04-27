@@ -54,7 +54,7 @@ class Worker
         if ($logFile) {
             switch ($code) {
                 case 0:
-                    echo 'Code is ok, delete logfile ' . $command . "\n";
+                    echo 'Code is ok, delete logfile ' . $logFile . "\n";
                     unlink($logFile);
                     break;
                 default:
