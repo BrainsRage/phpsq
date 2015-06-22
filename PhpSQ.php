@@ -22,6 +22,7 @@ class PhpSQ
     public function setAsyncTask(TaskInterface $task)
     {
         $queue = $this->getQueue($task->getQueueName());
+
         return $queue->addAsyncTask($task);
     }
 
@@ -29,12 +30,14 @@ class PhpSQ
     {
         $queue = $this->getQueue($task->getQueueName());
         $result = $queue->addSyncTask($task);
+
         return $result;
     }
 
     public function createWorker($argv)
     {
         $queue = $this->getQueueFromConsoleArgs($argv);
+
         return new Worker($queue);
     }
 
@@ -92,6 +95,7 @@ class PhpSQ
             }
             self::$instance = $instance;
         }
+
         return self::$instance;
     }
 
@@ -121,14 +125,30 @@ class PhpSQ
 
     private function setConfig(array $config)
     {
-        if(isset($config['supervisorConfigPath'])){
+        if (isset($config['supervisorConfigPath'])) {
 
         }
 
-        if (isset($config['storage']) && is_string($config['storage'])) {
+        /**
+         * @var StorageInterface $storageClass
+         */
+        if (isset($config['storage'])) {
+            $params = [];
+            if (is_string($config['storage'])) {
+                $storageClass = $config['storage'];
+            } else {
+                $storageConfig = $config['storage'];
+                if (isset($storageConfig['class'])) {
+                    $storageClass = $storageConfig['class'];
+                } else {
+                    throw new PhpSQException("No class for storage config");
+                }
+                if (isset($storageConfig['params'])) {
+                    $params = $storageConfig['params'];
+                }
+            }
             //single storage
-            $storageClass = $config['storage'];
-            $storage = new $storageClass;
+            $storage = new $storageClass($params);
             $this->addStorage(self::DEFAULT_STORAGE_NAME, $storage);
         } elseif (isset($config['storages'])) {
             $storages = $config['storages'];

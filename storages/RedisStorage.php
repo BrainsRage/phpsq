@@ -14,13 +14,19 @@ use Redis;
  */
 class RedisStorage implements StorageInterface
 {
+    private $host = '127.0.0.1';
+    private $port = 6380;
+    private $db = 3;
     private $redis;
 
-    public function __construct()
+    public function __construct($params)
     {
+        foreach ($params as $name => $value) {
+            $this->$name = $value;
+        }
         $redis = new Redis();
-        $redis->connect('127.0.0.1', 6380);
-        $redis->select(3);
+        $redis->connect($this->host, $this->port);
+        $redis->select($this->db);
         $this->redis = $redis;
     }
 
@@ -29,6 +35,7 @@ class RedisStorage implements StorageInterface
         $taskDataString = $this->serializeTaskData($task);
         $result = $this->redis->lPush($inStorageQueueKey, $taskDataString);
         $result = boolval($result);
+
         return $result;
     }
 
@@ -39,6 +46,7 @@ class RedisStorage implements StorageInterface
         if ($taskDataString !== false) {
             $task = $this->unserializeTaskData($taskDataString);
         }
+
         return $task;
     }
 
