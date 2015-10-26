@@ -15,6 +15,7 @@ class Queue
     private $name;
     private $inStoragePrefix = '';
     private $storage;
+    private $lockFile = null;
 
     public function __construct($name)
     {
@@ -51,6 +52,11 @@ class Queue
         $this->storage = $storage;
     }
 
+    public function setLockFile($lockFile)
+    {
+        $this->lockFile = $lockFile;
+    }
+
     private function getStorage()
     {
         return $this->storage;
@@ -83,5 +89,15 @@ class Queue
     public function getTask()
     {
         return $this->getStorage()->getTask($this->getInStorageKey());
+    }
+
+    public function isLocked()
+    {
+        return $this->isLockedByFile();
+    }
+
+    private function isLockedByFile()
+    {
+        return isset($this->lockFile) && file_exists($this->lockFile);
     }
 }

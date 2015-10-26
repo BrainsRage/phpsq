@@ -7,7 +7,7 @@ use phpsq\exceptions\PhpSQException;
  * Class PHPSQ
  *
  * @property StorageInterface[] $storages
- * @property Queue[]            $queues
+ * @property Queue[] $queues
  *
  * @package phpsq
  */
@@ -167,6 +167,11 @@ class PhpSQ
             throw new PhpSQException('No storages param in config');
         }
 
+        $defaultLockFile = null;
+        if (isset($config['lockFile'])) {
+            $defaultLockFile = $config['lockFile'];
+        }
+
         if ($this->hasStorages()) {
             if (isset($config['queues'])) {
                 $queues = $config['queues'];
@@ -178,6 +183,7 @@ class PhpSQ
                             $queue = new Queue($name);
                             $queueStorage = $this->getStorageByName(self::DEFAULT_STORAGE_NAME);
                             $queue->setStorage($queueStorage);
+                            $queue->setLockFile($defaultLockFile);
                             $this->addQueue($name, $queue);
                         }
                     } elseif ($queues['list']) {
@@ -208,6 +214,14 @@ class PhpSQ
                                 } else {
                                     throw new PhpSQException('Queue storage must be set');
                                 }
+
+                                //set lockfile
+                                if (isset($queueConfig['lockFile'])) {
+                                    $lockFile = $queueConfig['lockFile'];
+                                } else {
+                                    $lockFile = $defaultLockFile;
+                                }
+                                $queue->setLockFile($lockFile);
                             }
                         } else {
                             throw new PhpSQException('No queues');

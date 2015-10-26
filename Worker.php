@@ -19,21 +19,31 @@ class Worker
     public function start()
     {
         while (true) {
-            $storedTask = $this->getQueue()->getTask();
-            if ($storedTask) {
-                echo 'GET task';
-                if ($task = $storedTask->getTask()) {
-                    try {
-                        $this->executeCommand($task);
-                    } catch (\Exception $ex) {
-                        echo 'Error: ' . $ex->getMessage() . PHP_EOL;
-                        $this->getQueue()->addAsyncTask($task);
-                    }
-                }
+            $queue = $this->getQueue();
+            if ($queue->isLocked()) {
+                $this->sleep();
             } else {
-                sleep(1);
+                $storedTask = $this->getQueue()->getTask();
+                if ($storedTask) {
+                    echo 'GET task';
+                    if ($task = $storedTask->getTask()) {
+                        try {
+                            $this->executeCommand($task);
+                        } catch (\Exception $ex) {
+                            echo 'Error: ' . $ex->getMessage() . PHP_EOL;
+                            $this->getQueue()->addAsyncTask($task);
+                        }
+                    }
+                } else {
+                    $this->sleep();
+                }
             }
         }
+    }
+
+    private function sleep()
+    {
+        sleep(1);
     }
 
     public function executeCommand(TaskInterface $task)
