@@ -1,9 +1,9 @@
 {
-  "name": "codeworkz/phpsq",
+  "name": "brainsrage/phpsq",
   "type": "library",
   "description": "",
   "keywords": ["phpsq"],
-  "homepage": "https://github.com/anton-github/phpsq",
+  "homepage": "https://github.com/brainsrage/phpsq",
   "license": "Apache License 2.0",
   "authors": [
     {
