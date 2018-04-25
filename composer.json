@@ -4,7 +4,7 @@
   "description": "",
   "keywords": ["phpsq"],
   "homepage": "https://github.com/brainsrage/phpsq",
-  "license": "Apache License 2.0",
+  "license": "MIT",
   "authors": [
     {
       "name": "Anton",
